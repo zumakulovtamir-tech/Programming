@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Змейка-Конструктор</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background: #0f0c29; 
+            background: linear-gradient(to right, #24243e, #302b63, #0f0c29); 
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #game-container {
+            position: relative; 
+            width: 600px;
+            height: 600px;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.25);
+            border-radius: 15px;
+        }
+
+        canvas {
+            background-color: #151525;
+            border: 5px solid #00ffcc;
+            border-radius: 15px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+        }
+
+        #menu-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(20, 20, 35, 0.9); 
+            backdrop-filter: blur(12px); 
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 38px; 
+            color: #00ffcc;
+            text-shadow: 0 0 15px rgba(0, 255, 204, 0.6);
+            text-align: center;
+        }
+
+        #start-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            position: relative;
+        }
+
+        input {
+            padding: 15px;
+            font-size: 20px;
+            border-radius: 10px;
+            border: 2px solid #302b63;
+            background: #24243e;
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+            outline: none;
+            font-family: 'Montserrat', sans-serif;
+            transition: 0.3s;
+            width: 300px;
+            z-index: 2;
+        }
+
+        input:focus {
+            border-color: #00ffcc;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+        }
+
+        #customDropdown {
+            position: absolute;
+            top: 60px; 
+            width: 300px;
+            background: #24243e;
+            border: 2px solid #00ffcc;
+            border-radius: 10px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: none; 
+            z-index: 20;
+            max-height: 150px;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        #customDropdown li {
+            padding: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            border-bottom: 1px solid #302b63;
+            transition: 0.2s;
+            text-align: center;
+        }
+
+        #customDropdown li:last-child {
+            border-bottom: none;
+        }
+
+        #customDropdown li:hover {
+            background: #00ffcc;
+            color: #0f0c29;
+            font-weight: bold;
+        }
+
+        button#startBtn {
+            padding: 15px 50px;
+            font-size: 22px;
+            font-weight: bold;
+            background: #00ffcc;
+            color: #0f0c29;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: 'Montserrat', sans-serif;
+            box-shadow: 0 4px 20px rgba(0, 255, 204, 0.5);
+            z-index: 2;
+        }
+
+        button#startBtn:hover {
+            background: #00ccaa;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 255, 204, 0.7);
+        }
+
+        #leaderboard {
+            margin-top: 25px;
+            text-align: left;
+            width: 340px;
+            background: rgba(0,0,0,0.5);
+            padding: 20px 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #leaderboard h3 {
+            margin-bottom: 10px;
+            font-size: 20px;
+            text-align: center;
+            color: #ffcc00;
+        }
+
+        #scoreList {
+            margin: 0;
+            font-size: 18px;
+            line-height: 1.8;
+            list-style-type: none; /* Убираем стандартные цифры, так как у нас будут кубки */
+            padding-left: 10px;
+        }
+
+        #scoreList li {
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        #resetBtn {
+            margin-top: 15px;
+            background: transparent;
+            color: #ff3366;
+            border: 1px solid #ff3366;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: 'Montserrat', sans-serif;
+            transition: 0.2s;
+            width: 100%;
+        }
+        #resetBtn:hover {
+            background: #ff3366;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas" width="600" height="600"></canvas>
+        
+        <div id="menu-screen">
+            <h1>🐍 Змейка-Конструктор</h1>
+            
+            <div id="start-menu">
+                <input type="text" id="playerName" placeholder="Введи своё имя..." maxlength="10" autocomplete="off">
+                <ul id="customDropdown"></ul>
+                <button id="startBtn">ИГРАТЬ</button>
+            </div>
+
+            <div id="leaderboard">
+                <h3>🏆 Топ-5 Игроков:</h3>
+                <ol id="scoreList"></ol>
+                <button id="resetBtn">Сбросить все рекорды</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const menuScreen = document.getElementById("menu-screen");
+        const playerNameInput = document.getElementById("playerName");
+        const startBtn = document.getElementById("startBtn");
+        const scoreList = document.getElementById("scoreList");
+        const customDropdown = document.getElementById("customDropdown");
+        const resetBtn = document.getElementById("resetBtn");
+
+        const box = 30; 
+        const canvasSize = 600; 
+        const gridSize = 20; 
+
+        const FOOD_TYPES = [
+            { shape: "square", color: "#ff3366" },   
+            { shape: "circle", color: "#ffcc00" },   
+            { shape: "triangle", color: "#00ccff" }, 
+            { shape: "diamond", color: "#cc33ff" }   
+        ];
+
+        let snake = [];
+        let eaten = [];
+        let d = "RIGHT"; 
+        let food;
+        let score = 0;
+        let gameOver = false;
+        let gameInterval;
+        let playerName = "Игрок";
+        let gameState = "menu"; 
+
+        function loadPlayersList() {
+            customDropdown.innerHTML = ""; 
+            let allPlayers = JSON.parse(localStorage.getItem("snakePlayers")) || [];
+            
+            if (allPlayers.length === 0) {
+                let records = JSON.parse(localStorage.getItem("snakeHighScores")) || [];
+                records.forEach(r => {
+                    if (!allPlayers.includes(r.name)) allPlayers.push(r.name);
+                });
+                if (allPlayers.length > 0) {
+                    localStorage.setItem("snakePlayers", JSON.stringify(allPlayers));
+                }
+            }
+            
+            allPlayers.forEach(name => {
+                let li = document.createElement("li");
+                li.innerText = name;
+                li.addEventListener("mousedown", (e) => {
+                    e.preventDefault(); 
+                    playerNameInput.value = name;
+                    customDropdown.style.display = "none";
+                });
+                customDropdown.appendChild(li);
+            });
+        }
+
+        playerNameInput.addEventListener("focus", () => {
+            if (customDropdown.children.length > 0) {
+                for (let li of customDropdown.children) { li.style.display = ""; }
+                customDropdown.style.display = "block";
+            }
+        });
+
+        playerNameInput.addEventListener("input", () => {
+            let filter = playerNameInput.value.toLowerCase();
+            let hasVisible = false;
+            
+            for (let li of customDropdown.children) {
+                let txt = li.innerText.toLowerCase();
+                if (txt.includes(filter)) {
+                    li.style.display = "";
+                    hasVisible = true;
+                } else {
+                    li.style.display = "none";
+                }
+            }
+            
+            if (hasVisible && playerNameInput.value !== "") {
+                customDropdown.style.display = "block";
+            } else if (playerNameInput.value === "") {
+                customDropdown.style.display = "block";
+            } else {
+                customDropdown.style.display = "none";
+            }
+        });
+
+        document.addEventListener("click", (e) => {
+            if (e.target !== playerNameInput && e.target !== customDropdown) {
+                customDropdown.style.display = "none";
+            }
+        });
+
+        // --- ОБНОВЛЕННАЯ ТАБЛИЦА РЕКОРДОВ С КУБКАМИ ---
+        function loadLeaderboard() {
+            scoreList.innerHTML = ""; 
+            let records = JSON.parse(localStorage.getItem("snakeHighScores")) || [];
+            
+            if (records.length === 0) {
+                scoreList.innerHTML = "<li style='color: #888; text-align: center;'>Пока нет рекордов</li>";
+                return;
+            }
+
+            records.forEach((rec, index) => {
+                let li = document.createElement("li");
+                let medal = "";
+                
+                // Распределяем кубки и цвета
+                if (index === 0) {
+                    medal = "🥇 "; 
+                    li.style.color = "#ffd700"; // Золотой
+                } else if (index === 1) {
+                    medal = "🥈 "; 
+                    li.style.color = "#c0c0c0"; // Серебряный
+                } else if (index === 2) {
+                    medal = "🥉 "; 
+                    li.style.color = "#cd7f32"; // Бронзовый
+                } else {
+                    medal = "▫️ "; // Просто метка для остальных
+                    li.style.color = "#aaa"; // Серый
+                }
+
+                li.innerText = `${medal}${rec.name} — ${rec.score} очков`;
+                scoreList.appendChild(li);
+            });
+        }
+
+        function saveScore() {
+            let records = JSON.parse(localStorage.getItem("snakeHighScores")) || [];
+            records.push({ name: playerName, score: score });
+            records.sort((a, b) => b.score - a.score);
+            records = records.slice(0, 5); 
+            localStorage.setItem("snakeHighScores", JSON.stringify(records));
+            loadLeaderboard();
+        }
+
+        resetBtn.addEventListener("click", () => {
+            if (confirm("Ты уверен, что хочешь удалить все рекорды и имена?")) {
+                localStorage.removeItem("snakeHighScores");
+                localStorage.removeItem("snakePlayers");
+                loadLeaderboard();
+                loadPlayersList();
+            }
+        });
+
+        function initGame() {
+            snake = [{ x: 10 * box, y: 10 * box }];
+            eaten = [{ shape: "square", color: "#00ff00" }];
+            d = "RIGHT";
+            score = 0;
+            gameOver = false;
+            food = generateFood();
+        }
+
+        function generateFood() {
+            let randomType = FOOD_TYPES[Math.floor(Math.random() * FOOD_TYPES.length)];
+            return {
+                x: Math.floor(Math.random() * gridSize) * box,
+                y: Math.floor(Math.random() * gridSize) * box,
+                shape: randomType.shape,
+                color: randomType.color
+            };
+        }
+
+        startBtn.addEventListener("click", () => {
+            let name = playerNameInput.value.trim();
+            if (name === "") {
+                alert("Пожалуйста, введи своё имя!");
+                return;
+            }
+            playerName = name;
+
+            let allPlayers = JSON.parse(localStorage.getItem("snakePlayers")) || [];
+            if (!allPlayers.includes(playerName)) {
+                allPlayers.push(playerName);
+                localStorage.setItem("snakePlayers", JSON.stringify(allPlayers));
+            }
+            loadPlayersList(); 
+
+            customDropdown.style.display = "none"; 
+            menuScreen.style.display = "none"; 
+            gameState = "playing";
+            initGame();
+            clearInterval(gameInterval); 
+            gameInterval = setInterval(draw, 140); 
+        });
+
+        document.addEventListener("keydown", function(event) {
+            let key = event.key;
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(key)) {
+                event.preventDefault();
+            }
+            if (gameState !== "playing") return; 
+
+            if (key === "ArrowLeft" && d !== "RIGHT") d = "LEFT";
+            if (key === "ArrowUp" && d !== "DOWN") d = "UP";
+            if (key === "ArrowRight" && d !== "LEFT") d = "RIGHT";
+            if (key === "ArrowDown" && d !== "UP") d = "DOWN";
+        });
+
+        function collision(head, array) {
+            for (let i = 0; i < array.length; i++) {
+                if (head.x === array[i].x && head.y === array[i].y) return true;
+            }
+            return false;
+        }
+
+        function drawShape(x, y, shape, color, isHead, isFood) {
+            ctx.save(); 
+            ctx.shadowColor = color;
+            ctx.shadowBlur = isFood ? 20 : 12; 
+            
+            let pulse = isFood ? Math.sin(Date.now() / 150) * 3 : 0; 
+            let size = box + pulse;
+            let offset = (box - size) / 2;
+
+            let gradient = ctx.createLinearGradient(x, y, x + size, y + size);
+            gradient.addColorStop(0, color);
+            gradient.addColorStop(1, "#ffffff"); 
+
+            ctx.fillStyle = gradient;
+            ctx.strokeStyle = isHead ? "#ffffff" : color; 
+            ctx.lineWidth = isHead ? 3 : 2; 
+
+            ctx.beginPath(); 
+            
+            if (shape === "square") {
+                let r = 8; 
+                ctx.moveTo(x + offset + r, y + offset);
+                ctx.lineTo(x + offset + size - r, y + offset);
+                ctx.quadraticCurveTo(x + offset + size, y + offset, x + offset + size, y + offset + r);
+                ctx.lineTo(x + offset + size, y + offset + size - r);
+                ctx.quadraticCurveTo(x + offset + size, y + offset + size, x + offset + size - r, y + offset + size);
+                ctx.lineTo(x + offset + r, y + offset + size);
+                ctx.quadraticCurveTo(x + offset, y + offset + size, x + offset, y + offset + size - r);
+                ctx.lineTo(x + offset, y + offset + r);
+                ctx.quadraticCurveTo(x + offset, y + offset, x + offset + r, y + offset);
+                ctx.closePath();
+                ctx.fill();
+                if (isHead) ctx.stroke();
+            } 
+            else if (shape === "circle") {
+                ctx.arc(x + box/2, y + box/2, size/2, 0, Math.PI * 2);
+                ctx.fill();
+                if (isHead) ctx.stroke();
+            } 
+            else if (shape === "triangle") {
+                ctx.moveTo(x + box/2, y + offset); 
+                ctx.lineTo(x + offset + size, y + offset + size); 
+                ctx.lineTo(x + offset, y + offset + size); 
+                ctx.closePath();
+                ctx.fill();
+                if (isHead) ctx.stroke();
+            } 
+            else if (shape === "diamond") {
+                ctx.moveTo(x + box/2, y + offset); 
+                ctx.lineTo(x + offset + size, y + box/2); 
+                ctx.lineTo(x + box/2, y + offset + size); 
+                ctx.lineTo(x + offset, y + box/2); 
+                ctx.closePath();
+                ctx.fill();
+                if (isHead) ctx.stroke();
+            }
+            ctx.restore(); 
+        }
+
+        function drawBackground() {
+            let bgGradient = ctx.createLinearGradient(0, 0, canvasSize, canvasSize);
+            bgGradient.addColorStop(0, "#1e1e2f");
+            bgGradient.addColorStop(1, "#0f0c1b");
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, canvasSize, canvasSize);
+
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.03)";
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvasSize; i += box) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvasSize); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvasSize, i); ctx.stroke();
+            }
+        }
+
+        function draw() {
+            if (gameOver) return;
+
+            drawBackground(); 
+
+            for (let i = 0; i < snake.length; i++) {
+                let isHead = (i === 0); 
+                let info = eaten[i];
+                drawShape(snake[i].x, snake[i].y, info.shape, info.color, isHead, false);
+            }
+
+            drawShape(food.x, food.y, food.shape, food.color, false, true);
+
+            let snakeX = snake[0].x;
+            let snakeY = snake[0].y;
+
+            if (d === "LEFT") snakeX -= box;
+            if (d === "UP") snakeY -= box;
+            if (d === "RIGHT") snakeX += box;
+            if (d === "DOWN") snakeY += box;
+
+            if (snakeX < 0) snakeX = canvasSize - box;
+            else if (snakeX >= canvasSize) snakeX = 0;
+            if (snakeY < 0) snakeY = canvasSize - box;
+            else if (snakeY >= canvasSize) snakeY = 0;
+
+            let newHead = { x: snakeX, y: snakeY };
+
+            if (snakeX === food.x && snakeY === food.y) {
+                let currentMultiplier = Math.floor((eaten.length - 1) / 10) + 1;
+                score += 10 * currentMultiplier;
+                eaten.unshift({ shape: food.shape, color: food.color });
+                food = generateFood(); 
+            } else {
+                snake.pop(); 
+            }
+
+            if (collision(newHead, snake)) {
+                gameOver = true;
+                clearInterval(gameInterval); 
+                saveScore(); 
+                
+                ctx.fillStyle = "rgba(15, 12, 27, 0.9)";
+                ctx.fillRect(0, 0, canvasSize, canvasSize);
+                
+                ctx.font = "bold 50px Montserrat"; 
+                ctx.fillStyle = "#ff3366";
+                ctx.shadowColor = "#ff3366";
+                ctx.shadowBlur = 25;
+                ctx.textAlign = "center";
+                ctx.fillText("ИГРА ОКОНЧЕНА", canvasSize / 2, canvasSize / 2 - 30);
+                
+                ctx.shadowBlur = 0; 
+                ctx.font = "24px Montserrat";
+                ctx.fillStyle = "white";
+                ctx.fillText("Очки: " + score, canvasSize / 2, canvasSize / 2 + 30);
+                ctx.fillStyle = "#00ffcc";
+                ctx.fillText("Кликни, чтобы выйти в меню", canvasSize / 2, canvasSize / 2 + 80);
+                return;
+            }
+
+            snake.unshift(newHead);
+
+            let displayMultiplier = Math.floor((eaten.length - 1) / 10) + 1;
+            ctx.fillStyle = "white";
+            ctx.font = "bold 24px Montserrat"; 
+            ctx.textAlign = "left";
+            ctx.fillText("Очки: " + score, 20, 40);
+            
+            ctx.fillStyle = "#ffcc00";
+            ctx.textAlign = "right";
+            ctx.fillText("Бонус: x" + displayMultiplier, canvasSize - 20, 40);
+        }
+
+        canvas.addEventListener("click", () => {
+            if (gameState === "playing" && gameOver) {
+                gameState = "menu";
+                gameOver = false;
+                menuScreen.style.display = "flex"; 
+            }
+        });
+
+        // Инициализация
+        loadPlayersList();
+        loadLeaderboard();
+    </script>
+</body>
+</html>
