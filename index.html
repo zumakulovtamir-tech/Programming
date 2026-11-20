@@ -2,7 +2,6 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <!-- Этот тег жизненно важен для мобильных: он отключает зум и делает игру на весь экран -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Змейка-Конструктор (Mobile)</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
@@ -18,8 +17,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            /* Запрещаем скролл и зум на телефоне */
-            touch-action: none; 
+            touch-action: none; /* Запрещаем скролл страницы */
         }
 
         body {
@@ -32,7 +30,6 @@
             align-items: center;
         }
 
-        /* Контейнер теперь адаптивный. 95vmin означает 95% от меньшей стороны экрана */
         #game-container {
             position: relative; 
             width: 95vmin;
@@ -157,7 +154,6 @@
             transform: scale(0.95);
         }
 
-        /* --- ЭКРАН ПРОИГРЫША ДЛЯ ТЕЛЕФОНА --- */
         #game-over-screen {
             position: absolute;
             top: 0;
@@ -201,7 +197,6 @@
     <div id="game-container">
         <canvas id="gameCanvas" width="600" height="600"></canvas>
         
-        <!-- Меню -->
         <div id="menu-screen">
             <h1>🐍 Змейка</h1>
             <div id="start-menu">
@@ -211,7 +206,6 @@
             </div>
         </div>
 
-        <!-- Экран проигрыша (Специально для телефона) -->
         <div id="game-over-screen">
             <h2>ИГРА ОКОНЧЕНА</h2>
             <p>Очки: <span id="finalScore">0</span></p>
@@ -256,8 +250,14 @@
         let touchStartY = 0;
 
         canvas.addEventListener("touchstart", (e) => {
+            e.preventDefault(); // Блокируем стандартное поведение браузера
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
+        }, { passive: false });
+
+        // Блокируем скролл страницы при движении пальцем по игровому полю
+        canvas.addEventListener("touchmove", (e) => {
+            e.preventDefault(); 
         }, { passive: false });
 
         canvas.addEventListener("touchend", (e) => {
@@ -269,8 +269,8 @@
             let dx = touchEndX - touchStartX;
             let dy = touchEndY - touchStartY;
 
-            // Если свайп был длиннее 30 пикселей
-            if (Math.abs(dx) > 30 || Math.abs(dy) > 30) {
+            // --- ИЗМЕНЕНИЕ 1: Уменьшили порог с 30 до 15 пикселей для лучшего отклика ---
+            if (Math.abs(dx) > 15 || Math.abs(dy) > 15) {
                 if (Math.abs(dx) > Math.abs(dy)) {
                     if (dx > 0 && d !== "LEFT") d = "RIGHT";  
                     else if (dx < 0 && d !== "RIGHT") d = "LEFT"; 
@@ -290,7 +290,7 @@
             if (gameState !== "playing") return;
             let dx = e.clientX - touchStartX;
             let dy = e.clientY - touchStartY;
-            if (Math.abs(dx) > 30 || Math.abs(dy) > 30) {
+            if (Math.abs(dx) > 15 || Math.abs(dy) > 15) {
                 if (Math.abs(dx) > Math.abs(dy)) {
                     if (dx > 0 && d !== "LEFT") d = "RIGHT";  
                     else if (dx < 0 && d !== "RIGHT") d = "LEFT"; 
@@ -314,7 +314,8 @@
             gameOverScreen.style.display = "none";
             
             clearInterval(gameInterval); 
-            gameInterval = setInterval(draw, 130); 
+            // --- ИЗМЕНЕНИЕ 2: Уменьшили скорость игры (было 130, стало 170) ---
+            gameInterval = setInterval(draw, 170); 
         }
 
         function generateFood() {
@@ -429,7 +430,6 @@
             if (d === "RIGHT") snakeX += box;
             if (d === "DOWN") snakeY += box;
 
-            // Телепортация сквозь стены
             if (snakeX < 0) snakeX = canvasSize - box;
             else if (snakeX >= canvasSize) snakeX = 0;
             if (snakeY < 0) snakeY = canvasSize - box;
@@ -450,7 +450,6 @@
                 gameState = "gameover";
                 clearInterval(gameInterval);
                 
-                // Показываем красивый экран проигрыша
                 finalScoreSpan.innerText = score;
                 gameOverScreen.style.display = "flex";
                 return;
@@ -473,7 +472,6 @@
             let name = playerNameInput.value.trim();
             if (name === "") name = "Игрок";
             
-            // Сохраняем имя
             let allPlayers = JSON.parse(localStorage.getItem("snakePlayers")) || [];
             if (!allPlayers.includes(name)) {
                 allPlayers.push(name);
@@ -485,7 +483,6 @@
 
         restartBtn.addEventListener("click", initGame);
 
-        // Выпадающий список имен
         function loadPlayersList() {
             customDropdown.innerHTML = ""; 
             let allPlayers = JSON.parse(localStorage.getItem("snakePlayers")) || [];
