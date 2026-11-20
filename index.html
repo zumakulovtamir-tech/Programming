@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Змейка-Конструктор (Mobile)</title>
+    <title>Змейка-Конструктор</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
@@ -17,7 +17,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            touch-action: none; /* Запрещаем скролл страницы */
+            touch-action: none; 
         }
 
         body {
@@ -58,7 +58,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(20, 20, 35, 0.9); 
+            background: rgba(20, 20, 35, 0.95); 
             backdrop-filter: blur(12px); 
             border-radius: 10px;
             display: flex;
@@ -70,8 +70,8 @@
         }
 
         h1 {
-            margin-bottom: 20px;
-            font-size: 6vmin; 
+            margin-bottom: 15px;
+            font-size: 5vmin; 
             color: #00ffcc;
             text-shadow: 0 0 15px rgba(0, 255, 204, 0.6);
             text-align: center;
@@ -83,21 +83,22 @@
             align-items: center;
             width: 100%;
             position: relative;
+            margin-bottom: 15px;
         }
 
         input {
-            padding: 15px;
-            font-size: 4vmin;
+            padding: 12px;
+            font-size: 3.5vmin;
             border-radius: 10px;
             border: 2px solid #302b63;
             background: #24243e;
             color: white;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             text-align: center;
             outline: none;
             font-family: 'Montserrat', sans-serif;
-            width: 80%;
-            max-width: 300px;
+            width: 70%;
+            max-width: 250px;
             z-index: 2;
         }
 
@@ -108,9 +109,9 @@
 
         #customDropdown {
             position: absolute;
-            top: 60px; 
-            width: 80%;
-            max-width: 300px;
+            top: 45px; 
+            width: 70%;
+            max-width: 250px;
             background: #24243e;
             border: 2px solid #00ffcc;
             border-radius: 10px;
@@ -119,14 +120,14 @@
             margin: 0;
             display: none; 
             z-index: 20;
-            max-height: 150px;
+            max-height: 120px;
             overflow-y: auto;
         }
 
         #customDropdown li {
-            padding: 12px;
+            padding: 10px;
             cursor: pointer;
-            font-size: 4vmin;
+            font-size: 3.5vmin;
             border-bottom: 1px solid #302b63;
             text-align: center;
         }
@@ -137,8 +138,8 @@
         }
 
         button#startBtn {
-            padding: 15px 50px;
-            font-size: 5vmin;
+            padding: 12px 40px;
+            font-size: 4vmin;
             font-weight: bold;
             background: #00ffcc;
             color: #0f0c29;
@@ -152,6 +153,37 @@
         button#startBtn:active {
             background: #00ccaa;
             transform: scale(0.95);
+        }
+
+        #leaderboard {
+            text-align: left;
+            width: 85%;
+            max-width: 350px;
+            background: rgba(0,0,0,0.4);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #leaderboard h3 {
+            margin-bottom: 5px;
+            font-size: 3.5vmin;
+            text-align: center;
+            color: #ffcc00;
+        }
+
+        #scoreList {
+            margin: 0;
+            font-size: 3vmin;
+            line-height: 1.5;
+            list-style-type: none; 
+            padding-left: 0;
+        }
+
+        #scoreList li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 3px;
         }
 
         #game-over-screen {
@@ -172,19 +204,19 @@
 
         #game-over-screen h2 {
             color: #ff3366;
-            font-size: 8vmin;
+            font-size: 7vmin;
             margin-bottom: 10px;
             text-shadow: 0 0 20px #ff3366;
         }
 
         #game-over-screen p {
             font-size: 5vmin;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         #restartBtn {
-            padding: 15px 40px;
-            font-size: 5vmin;
+            padding: 12px 35px;
+            font-size: 4.5vmin;
             background: #00ffcc;
             color: #0f0c29;
             border: none;
@@ -198,11 +230,17 @@
         <canvas id="gameCanvas" width="600" height="600"></canvas>
         
         <div id="menu-screen">
-            <h1>🐍 Змейка</h1>
+            <h1>🐍 Змейка-Конструктор</h1>
+            
             <div id="start-menu">
                 <input type="text" id="playerName" placeholder="Твоё имя..." maxlength="10" autocomplete="off">
                 <ul id="customDropdown"></ul>
                 <button id="startBtn">ИГРАТЬ</button>
+            </div>
+
+            <div id="leaderboard">
+                <h3>🏆 Топ-5 Игроков:</h3>
+                <ol id="scoreList"></ol>
             </div>
         </div>
 
@@ -221,6 +259,7 @@
         const playerNameInput = document.getElementById("playerName");
         const startBtn = document.getElementById("startBtn");
         const customDropdown = document.getElementById("customDropdown");
+        const scoreList = document.getElementById("scoreList");
         
         const gameOverScreen = document.getElementById("game-over-screen");
         const finalScoreSpan = document.getElementById("finalScore");
@@ -244,18 +283,33 @@
         let score = 0;
         let gameInterval;
         let gameState = "menu"; 
+        let currentPlayerName = "Игрок";
 
-        // --- УПРАВЛЕНИЕ СВАЙПАМИ ---
+        // --- УПРАВЛЕНИЕ КЛАВИАТУРОЙ (ДЛЯ КОМПЬЮТЕРА) ---
+        document.addEventListener("keydown", function(event) {
+            let key = event.key;
+            // Запрещаем скролл страницы стрелками
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(key)) {
+                event.preventDefault();
+            }
+            if (gameState !== "playing") return; 
+
+            if (key === "ArrowLeft" && d !== "RIGHT") d = "LEFT";
+            if (key === "ArrowUp" && d !== "DOWN") d = "UP";
+            if (key === "ArrowRight" && d !== "LEFT") d = "RIGHT";
+            if (key === "ArrowDown" && d !== "UP") d = "DOWN";
+        });
+
+        // --- УПРАВЛЕНИЕ СВАЙПАМИ (ДЛЯ ТЕЛЕФОНА) ---
         let touchStartX = 0;
         let touchStartY = 0;
 
         canvas.addEventListener("touchstart", (e) => {
-            e.preventDefault(); // Блокируем стандартное поведение браузера
+            e.preventDefault(); 
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
         }, { passive: false });
 
-        // Блокируем скролл страницы при движении пальцем по игровому полю
         canvas.addEventListener("touchmove", (e) => {
             e.preventDefault(); 
         }, { passive: false });
@@ -269,7 +323,6 @@
             let dx = touchEndX - touchStartX;
             let dy = touchEndY - touchStartY;
 
-            // --- ИЗМЕНЕНИЕ 1: Уменьшили порог с 30 до 15 пикселей для лучшего отклика ---
             if (Math.abs(dx) > 15 || Math.abs(dy) > 15) {
                 if (Math.abs(dx) > Math.abs(dy)) {
                     if (dx > 0 && d !== "LEFT") d = "RIGHT";  
@@ -281,25 +334,37 @@
             }
         }, { passive: false });
 
-        // Для тестирования на компьютере мышкой
-        canvas.addEventListener("mousedown", (e) => {
-            touchStartX = e.clientX;
-            touchStartY = e.clientY;
-        });
-        canvas.addEventListener("mouseup", (e) => {
-            if (gameState !== "playing") return;
-            let dx = e.clientX - touchStartX;
-            let dy = e.clientY - touchStartY;
-            if (Math.abs(dx) > 15 || Math.abs(dy) > 15) {
-                if (Math.abs(dx) > Math.abs(dy)) {
-                    if (dx > 0 && d !== "LEFT") d = "RIGHT";  
-                    else if (dx < 0 && d !== "RIGHT") d = "LEFT"; 
-                } else {
-                    if (dy > 0 && d !== "UP") d = "DOWN";   
-                    else if (dy < 0 && d !== "DOWN") d = "UP"; 
-                }
+        // --- СИСТЕМА РЕКОРДОВ ---
+        function loadLeaderboard() {
+            scoreList.innerHTML = ""; 
+            let records = JSON.parse(localStorage.getItem("snakeHighScores")) || [];
+            
+            if (records.length === 0) {
+                scoreList.innerHTML = "<li style='color: #888; text-align: center; justify-content: center;'>Пока нет рекордов</li>";
+                return;
             }
-        });
+
+            records.forEach((rec, index) => {
+                let li = document.createElement("li");
+                let medal = "";
+                if (index === 0) { medal = "🥇 "; li.style.color = "#ffd700"; } 
+                else if (index === 1) { medal = "🥈 "; li.style.color = "#c0c0c0"; } 
+                else if (index === 2) { medal = "🥉 "; li.style.color = "#cd7f32"; } 
+                else { medal = "▫️ "; li.style.color = "#aaa"; }
+
+                li.innerText = `${medal}${rec.name} — ${rec.score}`;
+                scoreList.appendChild(li);
+            });
+        }
+
+        function saveScore() {
+            let records = JSON.parse(localStorage.getItem("snakeHighScores")) || [];
+            records.push({ name: currentPlayerName, score: score });
+            records.sort((a, b) => b.score - a.score);
+            records = records.slice(0, 5); 
+            localStorage.setItem("snakeHighScores", JSON.stringify(records));
+            loadLeaderboard();
+        }
 
         // --- ИГРОВАЯ ЛОГИКА ---
         function initGame() {
@@ -314,7 +379,6 @@
             gameOverScreen.style.display = "none";
             
             clearInterval(gameInterval); 
-            // --- ИЗМЕНЕНИЕ 2: Уменьшили скорость игры (было 130, стало 170) ---
             gameInterval = setInterval(draw, 170); 
         }
 
@@ -449,6 +513,7 @@
             if (collision(newHead, snake)) {
                 gameState = "gameover";
                 clearInterval(gameInterval);
+                saveScore(); // Сохраняем рекорд
                 
                 finalScoreSpan.innerText = score;
                 gameOverScreen.style.display = "flex";
@@ -468,9 +533,11 @@
             ctx.fillText("Бонус: x" + displayMultiplier, canvasSize - 20, 40);
         }
 
+        // --- ОБРАБОТЧИКИ КНОПОК ---
         startBtn.addEventListener("click", () => {
             let name = playerNameInput.value.trim();
             if (name === "") name = "Игрок";
+            currentPlayerName = name; // Запоминаем имя
             
             let allPlayers = JSON.parse(localStorage.getItem("snakePlayers")) || [];
             if (!allPlayers.includes(name)) {
@@ -481,8 +548,11 @@
             initGame();
         });
 
-        restartBtn.addEventListener("click", initGame);
+        restartBtn.addEventListener("click", () => {
+            initGame();
+        });
 
+        // Выпадающий список имен
         function loadPlayersList() {
             customDropdown.innerHTML = ""; 
             let allPlayers = JSON.parse(localStorage.getItem("snakePlayers")) || [];
@@ -507,7 +577,9 @@
             }
         });
 
+        // Инициализация при загрузке
         loadPlayersList();
+        loadLeaderboard();
     </script>
 </body>
 </html>
