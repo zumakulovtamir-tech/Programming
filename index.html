@@ -2,7 +2,9 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Змейка-Конструктор</title>
+    <!-- Этот тег жизненно важен для мобильных: он отключает зум и делает игру на весь экран -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Змейка-Конструктор (Mobile)</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
@@ -16,6 +18,8 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
+            /* Запрещаем скролл и зум на телефоне */
+            touch-action: none; 
         }
 
         body {
@@ -28,21 +32,26 @@
             align-items: center;
         }
 
+        /* Контейнер теперь адаптивный. 95vmin означает 95% от меньшей стороны экрана */
         #game-container {
             position: relative; 
-            width: 600px;
-            height: 600px;
+            width: 95vmin;
+            height: 95vmin;
+            max-width: 600px;
+            max-height: 600px;
             box-shadow: 0 0 50px rgba(0, 255, 255, 0.25);
             border-radius: 15px;
         }
 
         canvas {
             background-color: #151525;
-            border: 5px solid #00ffcc;
+            border: 4px solid #00ffcc;
             border-radius: 15px;
             position: absolute;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
             box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
         }
 
@@ -60,11 +69,12 @@
             justify-content: center;
             align-items: center;
             z-index: 10;
+            padding: 15px;
         }
 
         h1 {
             margin-bottom: 20px;
-            font-size: 38px; 
+            font-size: 6vmin; 
             color: #00ffcc;
             text-shadow: 0 0 15px rgba(0, 255, 204, 0.6);
             text-align: center;
@@ -80,7 +90,7 @@
 
         input {
             padding: 15px;
-            font-size: 20px;
+            font-size: 4vmin;
             border-radius: 10px;
             border: 2px solid #302b63;
             background: #24243e;
@@ -89,8 +99,8 @@
             text-align: center;
             outline: none;
             font-family: 'Montserrat', sans-serif;
-            transition: 0.3s;
-            width: 300px;
+            width: 80%;
+            max-width: 300px;
             z-index: 2;
         }
 
@@ -102,7 +112,8 @@
         #customDropdown {
             position: absolute;
             top: 60px; 
-            width: 300px;
+            width: 80%;
+            max-width: 300px;
             background: #24243e;
             border: 2px solid #00ffcc;
             border-radius: 10px;
@@ -113,96 +124,76 @@
             z-index: 20;
             max-height: 150px;
             overflow-y: auto;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
 
         #customDropdown li {
             padding: 12px;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 4vmin;
             border-bottom: 1px solid #302b63;
-            transition: 0.2s;
             text-align: center;
         }
 
-        #customDropdown li:last-child {
-            border-bottom: none;
-        }
-
-        #customDropdown li:hover {
+        #customDropdown li:active {
             background: #00ffcc;
             color: #0f0c29;
-            font-weight: bold;
         }
 
         button#startBtn {
             padding: 15px 50px;
-            font-size: 22px;
+            font-size: 5vmin;
             font-weight: bold;
             background: #00ffcc;
             color: #0f0c29;
             border: none;
             border-radius: 10px;
             cursor: pointer;
-            transition: 0.2s;
-            font-family: 'Montserrat', sans-serif;
             box-shadow: 0 4px 20px rgba(0, 255, 204, 0.5);
             z-index: 2;
         }
-
-        button#startBtn:hover {
+        
+        button#startBtn:active {
             background: #00ccaa;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 255, 204, 0.7);
+            transform: scale(0.95);
         }
 
-        #leaderboard {
-            margin-top: 25px;
-            text-align: left;
-            width: 340px;
-            background: rgba(0,0,0,0.5);
-            padding: 20px 30px;
-            border-radius: 15px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        #leaderboard h3 {
-            margin-bottom: 10px;
-            font-size: 20px;
-            text-align: center;
-            color: #ffcc00;
-        }
-
-        #scoreList {
-            margin: 0;
-            font-size: 18px;
-            line-height: 1.8;
-            list-style-type: none; /* Убираем стандартные цифры, так как у нас будут кубки */
-            padding-left: 10px;
-        }
-
-        #scoreList li {
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-        }
-
-        #resetBtn {
-            margin-top: 15px;
-            background: transparent;
-            color: #ff3366;
-            border: 1px solid #ff3366;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            font-family: 'Montserrat', sans-serif;
-            transition: 0.2s;
+        /* --- ЭКРАН ПРОИГРЫША ДЛЯ ТЕЛЕФОНА --- */
+        #game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
+            height: 100%;
+            background: rgba(15, 12, 27, 0.9);
+            backdrop-filter: blur(5px);
+            border-radius: 15px;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 15;
         }
-        #resetBtn:hover {
-            background: #ff3366;
-            color: white;
+
+        #game-over-screen h2 {
+            color: #ff3366;
+            font-size: 8vmin;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px #ff3366;
+        }
+
+        #game-over-screen p {
+            font-size: 5vmin;
+            margin-bottom: 30px;
+        }
+
+        #restartBtn {
+            padding: 15px 40px;
+            font-size: 5vmin;
+            background: #00ffcc;
+            color: #0f0c29;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -210,20 +201,21 @@
     <div id="game-container">
         <canvas id="gameCanvas" width="600" height="600"></canvas>
         
+        <!-- Меню -->
         <div id="menu-screen">
-            <h1>🐍 Змейка-Конструктор</h1>
-            
+            <h1>🐍 Змейка</h1>
             <div id="start-menu">
-                <input type="text" id="playerName" placeholder="Введи своё имя..." maxlength="10" autocomplete="off">
+                <input type="text" id="playerName" placeholder="Твоё имя..." maxlength="10" autocomplete="off">
                 <ul id="customDropdown"></ul>
                 <button id="startBtn">ИГРАТЬ</button>
             </div>
+        </div>
 
-            <div id="leaderboard">
-                <h3>🏆 Топ-5 Игроков:</h3>
-                <ol id="scoreList"></ol>
-                <button id="resetBtn">Сбросить все рекорды</button>
-            </div>
+        <!-- Экран проигрыша (Специально для телефона) -->
+        <div id="game-over-screen">
+            <h2>ИГРА ОКОНЧЕНА</h2>
+            <p>Очки: <span id="finalScore">0</span></p>
+            <button id="restartBtn">ИГРАТЬ СНОВА</button>
         </div>
     </div>
     
@@ -234,9 +226,11 @@
         const menuScreen = document.getElementById("menu-screen");
         const playerNameInput = document.getElementById("playerName");
         const startBtn = document.getElementById("startBtn");
-        const scoreList = document.getElementById("scoreList");
         const customDropdown = document.getElementById("customDropdown");
-        const resetBtn = document.getElementById("resetBtn");
+        
+        const gameOverScreen = document.getElementById("game-over-screen");
+        const finalScoreSpan = document.getElementById("finalScore");
+        const restartBtn = document.getElementById("restartBtn");
 
         const box = 30; 
         const canvasSize = 600; 
@@ -254,132 +248,73 @@
         let d = "RIGHT"; 
         let food;
         let score = 0;
-        let gameOver = false;
         let gameInterval;
-        let playerName = "Игрок";
         let gameState = "menu"; 
 
-        function loadPlayersList() {
-            customDropdown.innerHTML = ""; 
-            let allPlayers = JSON.parse(localStorage.getItem("snakePlayers")) || [];
-            
-            if (allPlayers.length === 0) {
-                let records = JSON.parse(localStorage.getItem("snakeHighScores")) || [];
-                records.forEach(r => {
-                    if (!allPlayers.includes(r.name)) allPlayers.push(r.name);
-                });
-                if (allPlayers.length > 0) {
-                    localStorage.setItem("snakePlayers", JSON.stringify(allPlayers));
-                }
-            }
-            
-            allPlayers.forEach(name => {
-                let li = document.createElement("li");
-                li.innerText = name;
-                li.addEventListener("mousedown", (e) => {
-                    e.preventDefault(); 
-                    playerNameInput.value = name;
-                    customDropdown.style.display = "none";
-                });
-                customDropdown.appendChild(li);
-            });
-        }
+        // --- УПРАВЛЕНИЕ СВАЙПАМИ ---
+        let touchStartX = 0;
+        let touchStartY = 0;
 
-        playerNameInput.addEventListener("focus", () => {
-            if (customDropdown.children.length > 0) {
-                for (let li of customDropdown.children) { li.style.display = ""; }
-                customDropdown.style.display = "block";
-            }
-        });
+        canvas.addEventListener("touchstart", (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: false });
 
-        playerNameInput.addEventListener("input", () => {
-            let filter = playerNameInput.value.toLowerCase();
-            let hasVisible = false;
+        canvas.addEventListener("touchend", (e) => {
+            if (gameState !== "playing") return;
             
-            for (let li of customDropdown.children) {
-                let txt = li.innerText.toLowerCase();
-                if (txt.includes(filter)) {
-                    li.style.display = "";
-                    hasVisible = true;
+            let touchEndX = e.changedTouches[0].clientX;
+            let touchEndY = e.changedTouches[0].clientY;
+
+            let dx = touchEndX - touchStartX;
+            let dy = touchEndY - touchStartY;
+
+            // Если свайп был длиннее 30 пикселей
+            if (Math.abs(dx) > 30 || Math.abs(dy) > 30) {
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    if (dx > 0 && d !== "LEFT") d = "RIGHT";  
+                    else if (dx < 0 && d !== "RIGHT") d = "LEFT"; 
                 } else {
-                    li.style.display = "none";
+                    if (dy > 0 && d !== "UP") d = "DOWN";   
+                    else if (dy < 0 && d !== "DOWN") d = "UP"; 
                 }
             }
-            
-            if (hasVisible && playerNameInput.value !== "") {
-                customDropdown.style.display = "block";
-            } else if (playerNameInput.value === "") {
-                customDropdown.style.display = "block";
-            } else {
-                customDropdown.style.display = "none";
-            }
+        }, { passive: false });
+
+        // Для тестирования на компьютере мышкой
+        canvas.addEventListener("mousedown", (e) => {
+            touchStartX = e.clientX;
+            touchStartY = e.clientY;
         });
-
-        document.addEventListener("click", (e) => {
-            if (e.target !== playerNameInput && e.target !== customDropdown) {
-                customDropdown.style.display = "none";
-            }
-        });
-
-        // --- ОБНОВЛЕННАЯ ТАБЛИЦА РЕКОРДОВ С КУБКАМИ ---
-        function loadLeaderboard() {
-            scoreList.innerHTML = ""; 
-            let records = JSON.parse(localStorage.getItem("snakeHighScores")) || [];
-            
-            if (records.length === 0) {
-                scoreList.innerHTML = "<li style='color: #888; text-align: center;'>Пока нет рекордов</li>";
-                return;
-            }
-
-            records.forEach((rec, index) => {
-                let li = document.createElement("li");
-                let medal = "";
-                
-                // Распределяем кубки и цвета
-                if (index === 0) {
-                    medal = "🥇 "; 
-                    li.style.color = "#ffd700"; // Золотой
-                } else if (index === 1) {
-                    medal = "🥈 "; 
-                    li.style.color = "#c0c0c0"; // Серебряный
-                } else if (index === 2) {
-                    medal = "🥉 "; 
-                    li.style.color = "#cd7f32"; // Бронзовый
+        canvas.addEventListener("mouseup", (e) => {
+            if (gameState !== "playing") return;
+            let dx = e.clientX - touchStartX;
+            let dy = e.clientY - touchStartY;
+            if (Math.abs(dx) > 30 || Math.abs(dy) > 30) {
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    if (dx > 0 && d !== "LEFT") d = "RIGHT";  
+                    else if (dx < 0 && d !== "RIGHT") d = "LEFT"; 
                 } else {
-                    medal = "▫️ "; // Просто метка для остальных
-                    li.style.color = "#aaa"; // Серый
+                    if (dy > 0 && d !== "UP") d = "DOWN";   
+                    else if (dy < 0 && d !== "DOWN") d = "UP"; 
                 }
-
-                li.innerText = `${medal}${rec.name} — ${rec.score} очков`;
-                scoreList.appendChild(li);
-            });
-        }
-
-        function saveScore() {
-            let records = JSON.parse(localStorage.getItem("snakeHighScores")) || [];
-            records.push({ name: playerName, score: score });
-            records.sort((a, b) => b.score - a.score);
-            records = records.slice(0, 5); 
-            localStorage.setItem("snakeHighScores", JSON.stringify(records));
-            loadLeaderboard();
-        }
-
-        resetBtn.addEventListener("click", () => {
-            if (confirm("Ты уверен, что хочешь удалить все рекорды и имена?")) {
-                localStorage.removeItem("snakeHighScores");
-                localStorage.removeItem("snakePlayers");
-                loadLeaderboard();
-                loadPlayersList();
             }
         });
 
+        // --- ИГРОВАЯ ЛОГИКА ---
         function initGame() {
             snake = [{ x: 10 * box, y: 10 * box }];
             eaten = [{ shape: "square", color: "#00ff00" }];
             d = "RIGHT";
             score = 0;
-            gameOver = false;
+            gameState = "playing";
             food = generateFood();
+            
+            menuScreen.style.display = "none";
+            gameOverScreen.style.display = "none";
+            
+            clearInterval(gameInterval); 
+            gameInterval = setInterval(draw, 130); 
         }
 
         function generateFood() {
@@ -391,42 +326,6 @@
                 color: randomType.color
             };
         }
-
-        startBtn.addEventListener("click", () => {
-            let name = playerNameInput.value.trim();
-            if (name === "") {
-                alert("Пожалуйста, введи своё имя!");
-                return;
-            }
-            playerName = name;
-
-            let allPlayers = JSON.parse(localStorage.getItem("snakePlayers")) || [];
-            if (!allPlayers.includes(playerName)) {
-                allPlayers.push(playerName);
-                localStorage.setItem("snakePlayers", JSON.stringify(allPlayers));
-            }
-            loadPlayersList(); 
-
-            customDropdown.style.display = "none"; 
-            menuScreen.style.display = "none"; 
-            gameState = "playing";
-            initGame();
-            clearInterval(gameInterval); 
-            gameInterval = setInterval(draw, 140); 
-        });
-
-        document.addEventListener("keydown", function(event) {
-            let key = event.key;
-            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(key)) {
-                event.preventDefault();
-            }
-            if (gameState !== "playing") return; 
-
-            if (key === "ArrowLeft" && d !== "RIGHT") d = "LEFT";
-            if (key === "ArrowUp" && d !== "DOWN") d = "UP";
-            if (key === "ArrowRight" && d !== "LEFT") d = "RIGHT";
-            if (key === "ArrowDown" && d !== "UP") d = "DOWN";
-        });
 
         function collision(head, array) {
             for (let i = 0; i < array.length; i++) {
@@ -510,7 +409,7 @@
         }
 
         function draw() {
-            if (gameOver) return;
+            if (gameState !== "playing") return;
 
             drawBackground(); 
 
@@ -530,6 +429,7 @@
             if (d === "RIGHT") snakeX += box;
             if (d === "DOWN") snakeY += box;
 
+            // Телепортация сквозь стены
             if (snakeX < 0) snakeX = canvasSize - box;
             else if (snakeX >= canvasSize) snakeX = 0;
             if (snakeY < 0) snakeY = canvasSize - box;
@@ -547,26 +447,12 @@
             }
 
             if (collision(newHead, snake)) {
-                gameOver = true;
-                clearInterval(gameInterval); 
-                saveScore(); 
+                gameState = "gameover";
+                clearInterval(gameInterval);
                 
-                ctx.fillStyle = "rgba(15, 12, 27, 0.9)";
-                ctx.fillRect(0, 0, canvasSize, canvasSize);
-                
-                ctx.font = "bold 50px Montserrat"; 
-                ctx.fillStyle = "#ff3366";
-                ctx.shadowColor = "#ff3366";
-                ctx.shadowBlur = 25;
-                ctx.textAlign = "center";
-                ctx.fillText("ИГРА ОКОНЧЕНА", canvasSize / 2, canvasSize / 2 - 30);
-                
-                ctx.shadowBlur = 0; 
-                ctx.font = "24px Montserrat";
-                ctx.fillStyle = "white";
-                ctx.fillText("Очки: " + score, canvasSize / 2, canvasSize / 2 + 30);
-                ctx.fillStyle = "#00ffcc";
-                ctx.fillText("Кликни, чтобы выйти в меню", canvasSize / 2, canvasSize / 2 + 80);
+                // Показываем красивый экран проигрыша
+                finalScoreSpan.innerText = score;
+                gameOverScreen.style.display = "flex";
                 return;
             }
 
@@ -583,17 +469,48 @@
             ctx.fillText("Бонус: x" + displayMultiplier, canvasSize - 20, 40);
         }
 
-        canvas.addEventListener("click", () => {
-            if (gameState === "playing" && gameOver) {
-                gameState = "menu";
-                gameOver = false;
-                menuScreen.style.display = "flex"; 
+        startBtn.addEventListener("click", () => {
+            let name = playerNameInput.value.trim();
+            if (name === "") name = "Игрок";
+            
+            // Сохраняем имя
+            let allPlayers = JSON.parse(localStorage.getItem("snakePlayers")) || [];
+            if (!allPlayers.includes(name)) {
+                allPlayers.push(name);
+                localStorage.setItem("snakePlayers", JSON.stringify(allPlayers));
+            }
+            loadPlayersList();
+            initGame();
+        });
+
+        restartBtn.addEventListener("click", initGame);
+
+        // Выпадающий список имен
+        function loadPlayersList() {
+            customDropdown.innerHTML = ""; 
+            let allPlayers = JSON.parse(localStorage.getItem("snakePlayers")) || [];
+            allPlayers.forEach(name => {
+                let li = document.createElement("li");
+                li.innerText = name;
+                li.addEventListener("mousedown", (e) => {
+                    e.preventDefault(); 
+                    playerNameInput.value = name;
+                    customDropdown.style.display = "none";
+                });
+                customDropdown.appendChild(li);
+            });
+        }
+
+        playerNameInput.addEventListener("focus", () => {
+            if (customDropdown.children.length > 0) customDropdown.style.display = "block";
+        });
+        document.addEventListener("click", (e) => {
+            if (e.target !== playerNameInput && e.target !== customDropdown) {
+                customDropdown.style.display = "none";
             }
         });
 
-        // Инициализация
         loadPlayersList();
-        loadLeaderboard();
     </script>
 </body>
 </html>
