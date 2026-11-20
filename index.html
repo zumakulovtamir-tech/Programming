@@ -288,7 +288,6 @@
         // --- УПРАВЛЕНИЕ КЛАВИАТУРОЙ (ДЛЯ КОМПЬЮТЕРА) ---
         document.addEventListener("keydown", function(event) {
             let key = event.key;
-            // Запрещаем скролл страницы стрелками
             if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(key)) {
                 event.preventDefault();
             }
@@ -379,7 +378,8 @@
             gameOverScreen.style.display = "none";
             
             clearInterval(gameInterval); 
-            gameInterval = setInterval(draw, 170); 
+            // --- ИЗМЕНЕНИЕ: Скорость стала 220 (было 170) ---
+            gameInterval = setInterval(draw, 220); 
         }
 
         function generateFood() {
@@ -513,7 +513,7 @@
             if (collision(newHead, snake)) {
                 gameState = "gameover";
                 clearInterval(gameInterval);
-                saveScore(); // Сохраняем рекорд
+                saveScore(); 
                 
                 finalScoreSpan.innerText = score;
                 gameOverScreen.style.display = "flex";
@@ -533,11 +533,10 @@
             ctx.fillText("Бонус: x" + displayMultiplier, canvasSize - 20, 40);
         }
 
-        // --- ОБРАБОТЧИКИ КНОПОК ---
         startBtn.addEventListener("click", () => {
             let name = playerNameInput.value.trim();
             if (name === "") name = "Игрок";
-            currentPlayerName = name; // Запоминаем имя
+            currentPlayerName = name; 
             
             let allPlayers = JSON.parse(localStorage.getItem("snakePlayers")) || [];
             if (!allPlayers.includes(name)) {
@@ -552,7 +551,6 @@
             initGame();
         });
 
-        // Выпадающий список имен
         function loadPlayersList() {
             customDropdown.innerHTML = ""; 
             let allPlayers = JSON.parse(localStorage.getItem("snakePlayers")) || [];
@@ -577,7 +575,6 @@
             }
         });
 
-        // Инициализация при загрузке
         loadPlayersList();
         loadLeaderboard();
     </script>
